@@ -1,0 +1,12 @@
+{
+  "tenant_isolation_mode": "shared",
+  "performance_threshold": {
+    "cpu_usage": 80,
+    "memory_usage": 75
+  },
+  "maintenance_window": {
+    "start": "02:00",
+    "end": "04:00",
+    "timezone": "UTC"
+  }
+}

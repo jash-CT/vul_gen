@@ -1,0 +1,181 @@
+{
+  "system_overview": {
+    "product_goal": "Enterprise multi-tenant platform for end-to-end business operations",
+    "non_goals": "Real-time global consistency, Absolute tenant data isolation, Zero-downtime deployments, Comprehensive compliance certification",
+    "assumed_users": "Enterprise customers, Internal operations staff, Third-party integration partners",
+    "explicitly_unprotected_areas": "Areas intentionally not in scope.",
+    "traffic_patterns": "{\"peak_load\": \"Business hours, regional variations\", \"expected_concurrent_users\": \"500-2000\", \"data_volume\": \"High transactional throughput\"}"
+  },
+  "service_architecture": [
+    {
+      "service_name": "user_management",
+      "language": "Go",
+      "responsibilities": "User registration, Authentication, Role management, Tenant provisioning",
+      "data_owned": "User profiles, Credentials, Access tokens",
+      "external_dependencies": "Identity providers, LDAP/Active Directory",
+      "trust_level": "semi-trusted",
+      "split_rationale": "Authentication is complex, requires specialized handling"
+    },
+    {
+      "service_name": "order_processing",
+      "language": "Kotlin",
+      "responsibilities": "Order creation, Pricing calculations, Inventory management, Payment integration",
+      "data_owned": "Order records, Transaction logs, Pricing configurations",
+      "external_dependencies": "Payment gateways, Inventory systems",
+      "trust_level": "internal",
+      "split_rationale": "High transaction volume requires dedicated scaling"
+    },
+    {
+      "service_name": "analytics_engine",
+      "language": "Python",
+      "responsibilities": "Data aggregation, Reporting generation, Tenant-specific insights",
+      "data_owned": "Aggregated metrics, Historical performance data",
+      "external_dependencies": "Data warehouses, Business intelligence tools",
+      "trust_level": "semi-trusted",
+      "split_rationale": "Complex data processing requires specialized environment"
+    },
+    {
+      "service_name": "integration_broker",
+      "language": "Rust",
+      "responsibilities": "Third-party API management, Webhook handling, External system synchronization",
+      "data_owned": "Integration configurations, Webhook event logs",
+      "external_dependencies": "Partner APIs, Message queues",
+      "trust_level": "untrusted",
+      "split_rationale": "High security requirements for external interactions"
+    },
+    {
+      "service_name": "operations_dashboard",
+      "language": "TypeScript/React",
+      "responsibilities": "Internal monitoring, Administrative controls, System health reporting",
+      "data_owned": "System configuration, Operational logs",
+      "external_dependencies": "Monitoring systems, Logging aggregators",
+      "trust_level": "internal",
+      "split_rationale": "Frontend complexity requires dedicated service"
+    },
+    {
+      "service_name": "tenant_management",
+      "language": "Java",
+      "responsibilities": "Multi-tenant configuration, Resource allocation, Billing and metering",
+      "data_owned": "Tenant metadata, Resource usage records",
+      "external_dependencies": "Billing systems, Resource provisioning",
+      "trust_level": "semi-trusted",
+      "split_rationale": "Complex billing and tenant lifecycle management"
+    }
+  ],
+  "data_flows": [
+    {
+      "source": "user_management",
+      "destination": "order_processing",
+      "protocol": "gRPC",
+      "authentication_assumptions": "JWT tokens     ",
+      "authorization_assumptions": "Role-based access checks",
+      "implicit_trust": "User identity verification"
+    },
+    {
+      "source": "integration_broker",
+      "destination": "order_processing",
+      "protocol": "Kafka messaging",
+      "authentication_assumptions": "Shared secret  ",
+      "authorization_assumptions": "Limited scope tokens",
+      "implicit_trust": "External system credentials"
+    },
+    {
+      "source": "analytics_engine",
+      "destination": "operations_dashboard",
+      "protocol": "REST API",
+      "authentication_assumptions": "Service-to-service tokens",
+      "authorization_assumptions": "Minimal filtering",
+      "implicit_trust": "Internal network segmentation"
+    }
+  ],
+  "trust_boundaries": [
+    {
+      "boundary_id": "boundary_0",
+      "components": [
+        "integration_broker",
+        "external_partners"
+      ],
+      "why_boundary_exists": "Security and isolation between components.",
+      "assumptions": "Partners follow security guidelines, Rate limiting prevents abuse",
+      "failure_modes": "Credential compromise, Malicious webhook payloads"
+    },
+    {
+      "boundary_id": "boundary_1",
+      "components": [
+        "tenant_management",
+        "order_processing"
+      ],
+      "why_boundary_exists": "Security and isolation between components.",
+      "assumptions": "Tenant separation through configuration, Minimal cross-tenant data access",
+      "failure_modes": "Resource over-allocation, Tenant data leakage"
+    }
+  ],
+  "async_and_background_processing": [
+    {
+      "worker_name": "worker",
+      "trigger": "event-driven",
+      "state_model": "At-least-once delivery",
+      "retry_behavior": "Exponential backoff",
+      "failure_assumptions": "Temporary external system failures"
+    },
+    {
+      "worker_name": "worker",
+      "trigger": "event-driven",
+      "state_model": "Idempotent processing",
+      "retry_behavior": "Fixed interval retries",
+      "failure_assumptions": "Partial data processing acceptable"
+    }
+  ],
+  "design_tradeoffs": [
+    {
+      "decision": "Mixed language services",
+      "justification": "Team expertise and legacy system integration",
+      "introduced_risks": "Inconsistent error handling, Complex dependency management",
+      "why_accepted": "Faster time-to-market"
+    },
+    {
+      "decision": "Minimal tenant isolation",
+      "justification": "Cost-effective resource sharing",
+      "introduced_risks": "Potential cross-tenant data exposure, Performance interference",
+      "why_accepted": "Competitive pricing model"
+    }
+  ],
+  "risk_analysis": [
+    {
+      "risk_id": "RT001",
+      "originating_architectural_decision": "Multi-language service communication",
+      "affected_services": [
+        "integration_broker",
+        "order_processing"
+      ],
+      "vulnerability_class": "deserialization",
+      "manifestation": "Inconsistent type handling across language boundaries",
+      "why_it_survives_reviews": "Subtle or cross-cutting; easy to miss in review."
+    },
+    {
+      "risk_id": "RT002",
+      "originating_architectural_decision": "Shared secret authentication",
+      "affected_services": [
+        "integration_broker",
+        "external_partners"
+      ],
+      "vulnerability_class": "secrets",
+      "manifestation": "Long-lived, widely distributed credentials",
+      "why_it_survives_reviews": "Subtle or cross-cutting; easy to miss in review."
+    }
+  ],
+  "expected_vulnerabilities": {
+    "total_count": 12,
+    "distribution_by_class": {
+      "authz-boundary": 2,
+      "async-consistency": 2,
+      "service-trust": 2,
+      "data-exposure": 2,
+      "multi-tenant": 1,
+      "secrets": 1,
+      "logging": 1,
+      "deserialization": 1
+    },
+    "rationale": "Reflects architectural complexity, external integrations, and multi-tenant design pressures"
+  }
+}

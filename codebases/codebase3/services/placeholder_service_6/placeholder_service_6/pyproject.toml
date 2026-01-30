@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "placeholder-service-6"
+version = "0.1.0"
+description = "Placeholder service for schema compliance"
+authors = ["Enterprise Architecture Team"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.68.0"
+uvicorn = "^0.15.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

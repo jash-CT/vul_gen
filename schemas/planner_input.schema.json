@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "PlannerInput",
+    "type": "object",
+    "required": ["business_logic_description", "constraints"],
+    "properties": {
+      "business_logic_description": {
+        "type": "string",
+        "minLength": 50
+      },
+      "constraints": {
+        "type": "object",
+        "required": [
+          "scale",
+          "languages",
+          "vulnerability_count",
+          "vulnerability_classes"
+        ],
+        "properties": {
+          "scale": {
+            "type": "object",
+            "required": ["loc_range", "services"],
+            "properties": {
+              "loc_range": {
+                "type": "string",
+                "enum": ["10k-30k"]
+              },
+              "services": {
+                "type": "string",
+                "enum": ["6-10"]
+              }
+            }
+          },
+          "languages": {
+            "type": "string",
+            "enum": ["mixed"]
+          },
+          "vulnerability_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "vulnerability_classes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+  

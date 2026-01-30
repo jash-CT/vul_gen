@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "total_count": 12,
+    "distribution_by_class": {
+      "authz-boundary": 2,
+      "async-consistency": 2,
+      "service-trust": 2,
+      "data-exposure": 2,
+      "multi-tenant": 1,
+      "secrets": 1,
+      "logging": 1,
+      "business-logic": 1
+    },
+    "rationale": "Reflects real-world enterprise system complexity with emphasis on integration and multi-tenant challenges"
+  },
+  "vulnerabilities": [
+    {
+      "risk_id": "R001",
+      "originating_architectural_decision": "Multi-tenant data sharing",
+      "affected_services": [
+        "order_processing_service",
+        "analytics_service"
+      ],
+      "vulnerability_class": "multi-tenant",
+      "manifestation": "Potential query-based data leakage through aggregation layer",
+      "why_it_survives_reviews": "Subtle or cross-cutting; easy to miss in review."
+    },
+    {
+      "risk_id": "R002",
+      "originating_architectural_decision": "External integration design",
+      "affected_services": [
+        "integration_broker",
+        "order_processing_service"
+      ],
+      "vulnerability_class": "service-trust",
+      "manifestation": "Insufficient validation of external system credentials",
+      "why_it_survives_reviews": "Subtle or cross-cutting; easy to miss in review."
+    }
+  ]
+}
