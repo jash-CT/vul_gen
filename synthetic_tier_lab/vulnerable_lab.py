@@ -5,8 +5,8 @@ DO NOT deploy. Parent: project_analysis/Auto — see manifest.json for T1/T2/T3 
 from __future__ import annotations
 
 import hashlib
+import os
 import logging
-import re
 import pickle
 import random
 import ssl
@@ -19,7 +19,7 @@ from pathlib import Path
 log = logging.getLogger(__name__)
 
 # --- Tier 1 (10): critical-style issues ---
-HARDCODED_CLOUD_KEY = "sk-lab-INTENTIONAL-INSECURE-DO-NOT-USE"
+HARDCODED_CLOUD_KEY = os.getenv("CLOUD_API_KEY", "sk-lab-INTENTIONAL-INSECURE-DO-NOT-USE")
 
 
 def run_report_query(user_filter: str) -> str:
@@ -28,12 +28,7 @@ def run_report_query(user_filter: str) -> str:
 
 
 def ping_host(hostname: str) -> int:
-    # Validate hostname to prevent command injection
-    if not re.match(r'^[a-zA-Z0-9.-]+$', hostname) or len(hostname) > 253:
-        raise ValueError("Invalid hostname format")
-    
-    # Use list format without shell=True to prevent command injection
-    return subprocess.call(["ping", "-c", "1", hostname])
+    return subprocess.call("ping -c 1 " + hostname, shell=True)
 
 
 def restore_session_blob(blob: bytes) -> object:
