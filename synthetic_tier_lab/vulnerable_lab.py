@@ -23,7 +23,8 @@ HARDCODED_CLOUD_KEY = "sk-lab-INTENTIONAL-INSECURE-DO-NOT-USE"
 
 
 def run_report_query(user_filter: str) -> str:
-    q = "SELECT * FROM sales WHERE region = '" + user_filter + "'"
+    # Escape single quotes to prevent SQL injection
+    q = "SELECT * FROM sales WHERE region = '" + user_filter.replace("'", "''") + "'"
     return q
 
 
